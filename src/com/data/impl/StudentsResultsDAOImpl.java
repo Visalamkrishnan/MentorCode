@@ -69,11 +69,11 @@ public DataRetriever getDataRetriever() {
 				}
 				
 				if(studentDTO.getTechPercentage()!=null){
-					query.append(" AND cu.techPercentage= :tech");
+					query.append(" AND cu.techPercentage>= :tech");
 					queryParameters.add(new QueryParameter<Integer>("tech", studentDTO.getTechPercentage()));
 				}
 				if(studentDTO.getAptPercentage()!=null){
-					query.append(" AND cu.aptPercentage= :apt");
+					query.append(" AND cu.aptPercentage>= :apt");
 					queryParameters.add(new QueryParameter<Integer>("apt", studentDTO.getAptPercentage()));
 				}
 				if(studentDTO.getCurrentArrears()!=null){
