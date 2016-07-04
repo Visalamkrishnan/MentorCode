@@ -175,7 +175,10 @@ public class UniversityFilterBean implements Serializable {
 	    		FacesContext.getCurrentInstance().getExternalContext()
 				.getRequestParameterMap();
 	    if (reqMap.containsKey("add")) {
+	    	if(results.getReviewerResult()!=null && !results.getReviewerResult().isEmpty())
+	    	{
 	    	comments=results.getReviewerResult();
+	    	}
 	      pf = "add";
 	    }
 	    return pf;
