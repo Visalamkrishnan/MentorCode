@@ -149,6 +149,14 @@ public class UniversityFilterBean implements Serializable {
 	@PostConstruct
 	public void init() {
 		try {
+			Map<String, String> params = FacesContext.getCurrentInstance().getExternalContext()
+					.getRequestParameterMap();
+			 studentId = params.get("studentId");
+			 if(studentId!=null)
+			 {
+				 Long studId = Long.valueOf(studentId);
+					results = getStudentsResultsService().getDetailsById(studId);
+			 }
 			pageFlag = getPageFlagFromReq();
 			if (majors == null) {
 				majors = getStudentsResultsService().doGetAllDepartment();
@@ -167,6 +175,7 @@ public class UniversityFilterBean implements Serializable {
 	    		FacesContext.getCurrentInstance().getExternalContext()
 				.getRequestParameterMap();
 	    if (reqMap.containsKey("add")) {
+	    	comments=results.getReviewerResult();
 	      pf = "add";
 	    }
 	    return pf;
@@ -197,21 +206,13 @@ public class UniversityFilterBean implements Serializable {
 	// save
 	public void saveDetails() {
 		try {
-			Map<String, String> params = FacesContext.getCurrentInstance().getExternalContext()
-					.getRequestParameterMap();
-			 studentId = params.get("studentId");
-			if (comments != null && !comments.isEmpty() && studentId!=null) {
-				Long studId = Long.valueOf(studentId);
-				results = getStudentsResultsService().getDetailsById(studId);
+			if (comments != null && !comments.isEmpty()) {
 				results.setReviewerResult(comments);
 				getStudentsResultsService().saveDetails(results);
+				MessageRender.addInfoMessage("Review notes Saved Successfully");
 			}
 		} catch (BusinessServiceException ex) {
 			MessageRender.addErrorMessage(ex.getMessage());
 		}
 	}
-public void showPanel(Long studentId)
-{
-	
-}
 }
