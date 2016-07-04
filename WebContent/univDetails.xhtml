@@ -205,6 +205,12 @@ order-table {
 			<h:commandButton value="Save" id="saveLink" class="button"
 			rendered="#{universityFilterBean.pageFlag eq 'add'}"
 							action="#{universityFilterBean.saveDetails}">
+							<f:ajax execute="@form" render="@form" />
+						</h:commandButton>
+						<h:commandButton value="Back" id="back" class="button"
+			rendered="#{universityFilterBean.pageFlag eq 'add'}" immediate="true"
+							action="univDetails?faces-redirect=true">
+							<f:ajax execute="@form" render="@form" />
 						</h:commandButton>
 			</h:panelGroup>
 		</h:panelGrid>
