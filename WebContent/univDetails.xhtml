@@ -100,8 +100,9 @@ order-table {
 					action="#{universityFilterBean.searchForStudent}">
 					<f:ajax execute="@form" render="@form" />
 					</h:commandButton>
-					<h:commandButton class="button" value="reset" type="reset">
-					<f:ajax execute="@form" render="@form" />
+					<h:commandButton class="button" value="reset"
+					  action="univDetails?faces-redirect=true"
+						immediate="true" update="@form">
 					</h:commandButton>
 			</h:panelGroup>
 		</h:panelGrid>
