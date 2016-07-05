@@ -9,15 +9,32 @@ import javax.faces.bean.ManagedBean;
 import javax.faces.bean.ManagedProperty;
 import javax.faces.bean.ViewScoped;
 import javax.faces.context.FacesContext;
+import javax.servlet.http.HttpServletResponse;
 
 import com.biz.StudentsResultsService;
 import com.biz.exception.BusinessServiceException;
 import com.dto.StudentDTO;
+import com.mbeans.utils.FacesContextUtil;
 import com.mbeans.utils.MessageRender;
 import com.models.SeedMajor;
 import com.models.StudentsResults;
 import com.models.University;
 
+import jxl.Workbook;
+import jxl.format.Alignment;
+import jxl.format.Border;
+import jxl.format.BorderLineStyle;
+import jxl.format.CellFormat;
+import jxl.format.Colour;
+import jxl.write.Font;
+import jxl.write.Label;
+import jxl.write.WritableCell;
+import jxl.write.WritableCellFormat;
+import jxl.write.WritableFont;
+import jxl.write.WritableSheet;
+import jxl.write.WritableWorkbook;
+
+@SuppressWarnings("deprecation")
 @ManagedBean
 @ViewScoped
 public class UniversityFilterBean implements Serializable {
@@ -43,10 +60,10 @@ public class UniversityFilterBean implements Serializable {
 	private String comments;
 
 	private Boolean isSelected;
-	
+
 	private String studentId;
-	
-	String pageFlag ;
+
+	String pageFlag;
 
 	// getter setter starts
 
@@ -151,12 +168,11 @@ public class UniversityFilterBean implements Serializable {
 		try {
 			Map<String, String> params = FacesContext.getCurrentInstance().getExternalContext()
 					.getRequestParameterMap();
-			 studentId = params.get("studentId");
-			 if(studentId!=null)
-			 {
-				 Long studId = Long.valueOf(studentId);
-					results = getStudentsResultsService().getDetailsById(studId);
-			 }
+			studentId = params.get("studentId");
+			if (studentId != null) {
+				Long studId = Long.valueOf(studentId);
+				results = getStudentsResultsService().getDetailsById(studId);
+			}
 			pageFlag = getPageFlagFromReq();
 			if (majors == null) {
 				majors = getStudentsResultsService().doGetAllDepartment();
@@ -170,18 +186,15 @@ public class UniversityFilterBean implements Serializable {
 	}
 
 	private String getPageFlagFromReq() {
-	    String pf = null;
-	    Map<String, String> reqMap =
-	    		FacesContext.getCurrentInstance().getExternalContext()
-				.getRequestParameterMap();
-	    if (reqMap.containsKey("add")) {
-	    	if(results.getReviewerResult()!=null && !results.getReviewerResult().isEmpty())
-	    	{
-	    	comments=results.getReviewerResult();
-	    	}
-	      pf = "add";
-	    }
-	    return pf;
+		String pf = null;
+		Map<String, String> reqMap = FacesContext.getCurrentInstance().getExternalContext().getRequestParameterMap();
+		if (reqMap.containsKey("add")) {
+			if (results.getReviewerResult() != null && !results.getReviewerResult().isEmpty()) {
+				comments = results.getReviewerResult();
+			}
+			pf = "add";
+		}
+		return pf;
 	}
 
 	// search student
@@ -189,16 +202,16 @@ public class UniversityFilterBean implements Serializable {
 		try {
 			if (universityId != null) {
 				studentDTO.setUniversityId(universityId);
-			} else {
-				studentDTO.setUniversityId(null);
-			}
+			} 
 			if (majorId != null) {
 				studentDTO.setMajorId(majorId);
 			} else {
 				studentDTO.setMajorId(null);
 			}
-
+			if(studentDTO.getUniversityId()!=null)
+			{
 			students = getStudentsResultsService().doGetAllInternsBasedOnType(studentDTO);
+			}
 
 		} catch (BusinessServiceException ex) {
 			MessageRender.addErrorMessage(ex.getMessage());
@@ -217,5 +230,69 @@ public class UniversityFilterBean implements Serializable {
 		} catch (BusinessServiceException ex) {
 			MessageRender.addErrorMessage(ex.getMessage());
 		}
+	}
+
+	// download details in excel
+	public void downloadAsExcel() {
+		try {
+			HttpServletResponse res = (HttpServletResponse) FacesContextUtil.getExternalContext().getResponse();
+			res.setContentType("application/vnd.ms-excel");
+			res.setHeader("Content-Disposition", "attachment; filename=ReportSheet.xls");
+
+			WritableWorkbook w = Workbook.createWorkbook(res.getOutputStream());
+			WritableSheet s = w.createSheet("Report", 0);
+			WritableFont cellFont = new WritableFont(WritableFont.COURIER, 12);
+			cellFont.setColour(Colour.BLACK);
+			cellFont.setBoldStyle(Font.BOLD);
+			s.setColumnView(0, 30);
+			s.setColumnView(1, 45);
+			s.setColumnView(2, 35);
+			s.setColumnView(3, 25);
+			s.setColumnView(4, 25);
+			s.setColumnView(5, 25);
+			WritableCellFormat cellFormat = new WritableCellFormat(cellFont);
+			cellFormat.setBackground(Colour.WHITE);
+			cellFormat.setBorder(Border.ALL, BorderLineStyle.THIN);
+			cellFormat.setAlignment(Alignment.CENTRE);
+			s.addCell((WritableCell) new Label(0, 0, "NAME", (CellFormat) cellFormat));
+			s.addCell((WritableCell) new Label(1, 0, "EMAIL", (CellFormat) cellFormat));
+			s.addCell((WritableCell) new Label(2, 0, "UNIVERSITY", (CellFormat) cellFormat));
+			s.addCell((WritableCell) new Label(3, 0, "DEPARTMENT", (CellFormat) cellFormat));
+			s.addCell((WritableCell) new Label(4, 0, "APTITUDE PERCENTAGE", (CellFormat) cellFormat));
+			s.addCell((WritableCell) new Label(5, 0, "TECHNICAL PERCENTAGE", (CellFormat) cellFormat));
+			int ite = 1;
+			for (StudentsResults student : students) {
+
+				if (student.getName() != null) {
+					s.addCell((WritableCell) new Label(0, ite, student.getName()));
+				}
+				if (student.getEmail() != null) {
+					s.addCell((WritableCell) new Label(1, ite, student.getEmail()));
+				}
+				if (student.getUniversity().getName() != null) {
+					s.addCell((WritableCell) new Label(2, ite, student.getUniversity().getName()));
+
+				}
+				if (student.getMajor().getName() != null) {
+					s.addCell((WritableCell) new Label(3, ite, student.getMajor().getName()));
+				}
+				if (student.getAptPercentage().toString() != null) {
+					s.addCell((WritableCell) new Label(4, ite, student.getAptPercentage().toString()));
+				}
+				if (student.getTechPercentage().toString() != null) {
+					s.addCell((WritableCell) new Label(5, ite, student.getTechPercentage().toString()));
+				}
+
+				ite++;
+			}
+			w.write();
+			w.close();
+			res.getOutputStream().flush();
+			res.getOutputStream().close();
+			FacesContext.getCurrentInstance().responseComplete();
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+
 	}
 }
