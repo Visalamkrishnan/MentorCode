@@ -1,0 +1,192 @@
+<!DOCTYPE html>
+
+<html xmlns="http://www.w3.org/1999/xhtml"
+	xmlns:ui="http://java.sun.com/jsf/facelets"
+	xmlns:f="http://java.sun.com/jsf/core"
+	xmlns:h="http://java.sun.com/jsf/html"
+	xmlns:c="http://java.sun.com/jsp/jstl/core">
+
+<h:head>
+	<title>JSF Project</title>
+	<link rel="stylesheet" href="resources/css/style.css" />
+</h:head>
+
+<h:body>
+	<h:form id="univSearchForm">
+	
+
+	<h1 class="stu-header">University Search</h1>
+	<h:messages globalOnly="true" styleClass="isa_info" />
+				
+		<h:panelGrid id="stuDetails" columns="3" 
+         cellpadding="10" cellspacing="0"
+         rendered="#{universityFilterBean.pageFlag ne 'add'}">
+			<h:panelGroup>
+				<h:outputLabel value="University: " />
+				<h:selectOneMenu id="uName" required="true" requiredMessage="Please select univeristy"
+					value="#{universityFilterBean.universityId}"
+					styleClass="padd-rems rediocv col-xs-12 col-sm-12">
+					<f:selectItem itemLabel="Select" itemValue="#{null}" />
+					<f:selectItems value="#{universityFilterBean.universities}"
+						var="univ" itemValue="#{univ.id}" itemLabel="#{univ.name}" />
+				</h:selectOneMenu>
+				<br/>
+				<h:message for="uName" style="color:red "/>
+			</h:panelGroup>
+			<h:panelGroup>
+				<h:outputLabel value="Department Name: " />
+				<h:selectOneMenu id="mName" value="#{universityFilterBean.majorId}"
+					styleClass="padd-rems rediocv col-xs-12 col-sm-12">
+					<f:selectItem itemLabel="Select" itemValue="#{null}" />
+					<f:selectItems value="#{universityFilterBean.majors}" var="maj"
+						itemValue="#{maj.id}" itemLabel="#{maj.name}" />
+				</h:selectOneMenu>
+			</h:panelGroup>
+			<h:panelGroup>
+				<h:outputLabel value="Current Arrears: " />
+				<h:selectOneMenu id="ca" styleClass="padd-rems rediocv col-xs-12 col-sm-12"
+					value="#{universityFilterBean.studentDTO.currentArrears}">
+					<f:selectItem itemLabel="Select" itemValue="#{null}" />
+					<f:selectItem id="yes" itemLabel="Yes" itemValue="true" />
+					<f:selectItem id="no" itemLabel="No" itemValue="false" />
+				</h:selectOneMenu>
+			</h:panelGroup>
+			<h:panelGroup>
+				<h:outputLabel value="Aptitude Score: " />
+				<h:inputText
+					value="#{universityFilterBean.studentDTO.aptPercentage}" />
+			</h:panelGroup>
+			<h:panelGroup>
+				<h:outputLabel value="Technical Score: " />
+				<h:inputText
+					value="#{universityFilterBean.studentDTO.techPercentage}" />
+			</h:panelGroup>
+			<h:panelGroup>
+				<h:commandButton value="Search" class="button"
+				rendered="#{universityFilterBean.pageFlag ne 'add'}"
+					action="#{universityFilterBean.searchForStudent}">
+					<f:ajax execute="@form" render="@form" />
+					</h:commandButton>
+					<h:commandButton class="button" value="reset"
+					  action="univDetails?faces-redirect=true"
+						immediate="true" update="@form">
+					</h:commandButton>
+					<h:commandButton value="Download as Excel" class="button"
+                      action="#{universityFilterBean.downloadAsExcel()}"
+                     rendered="#{universityFilterBean.students.size()!=0 and universityFilterBean.students!=null}">
+                     </h:commandButton>
+			</h:panelGroup>
+		</h:panelGrid>
+
+
+		<h:dataTable id="studentList" value="#{universityFilterBean.students}"
+			var="student" binding="#{studentSearchTable}"
+			styleClass="order-table" headerClass="order-table-header"
+			rowClasses="order-table-odd-row,order-table-even-row"
+			rendered="#{universityFilterBean.students.size()!=0 and universityFilterBean.students!=null
+			and universityFilterBean.pageFlag ne 'add'}">
+			<h:column>
+				<f:facet name="header">
+					<h:outputText value="S.No" />
+				</f:facet>
+				<div align="right">
+					<h:outputText value="#{studentSearchTable.rowIndex + 1}" />
+				</div>
+			</h:column>
+			<h:column>
+				<f:facet name="header">
+					<h:outputText value="Name" />
+				</f:facet>
+					<h:outputText value="#{student.name}" />
+			</h:column>
+			<h:column>
+				<f:facet name="header">
+					<h:outputText value="Email" />
+				</f:facet>
+					<h:outputText value="#{student.email}" />
+			</h:column>
+				<h:column>
+				<f:facet name="header">
+					<h:outputText value="University Name" />
+				</f:facet>
+					<h:outputText value="#{student.university.name}" />
+			</h:column>
+			<h:column>
+				<f:facet name="header">
+					<h:outputText value="Apptitude Score" />
+				</f:facet>
+				<div align="right">
+					<h:outputText value="#{student.aptPercentage}" />
+				</div>
+			</h:column>
+			<h:column>
+				<f:facet name="header">
+					<h:outputText value="Technical Score" />
+				</f:facet>
+				<div align="right">
+					<h:outputText value="#{student.techPercentage}" />
+				</div>
+			</h:column>
+			<h:column>
+				<f:facet name="header">
+					<h:outputText value="Arrears" />
+				</f:facet>
+					<h:outputText value="#{student.currentArrears eq true?'Yes':'No'}" />
+			</h:column>
+			
+			<h:column>
+				<f:facet name="header">
+					<h:outputText value="Action" />
+				</f:facet>
+				<div align="right">
+				<h:outputLink value="univDetails.xhtml?add"
+							styleClass="btn btn-sm btn-primary emp-back"
+							rendered="#{universityFilterBean.pageFlag ne 'add'}">
+							<f:param name="studentId"
+								value="#{student.id}" />
+							<i class="fa fa-plus-circle"></i>Review</h:outputLink>
+				</div>
+			</h:column>
+
+		</h:dataTable>
+
+		<h4>
+			<h:outputText value="No Records Found"
+				class="header  bord smaller lighter blue"
+				rendered="#{universityFilterBean.students.size()==0 and universityFilterBean.students!=null}">
+			</h:outputText>
+		</h4>
+				<h:panelGrid id="grid" columns="1" 
+         cellpadding="10" cellspacing="0" rendered="#{universityFilterBean.pageFlag eq 'add'}">
+			<h:panelGroup>
+				<h:outputLabel value="Comments: " />
+				<h:inputTextarea id="comments" required="true" requiredMessage="Please enter the comments"
+					value="#{universityFilterBean.comments}" />
+					<br/>
+					<h:message for="comments" style="color:red"/>
+			</h:panelGroup>
+			<h:panelGroup>
+				<h:outputLabel value="IsSlected: " />
+				<h:selectOneMenu id="subscriptions" styleClass="padd-rems rediocv col-xs-12 col-sm-12"
+					value="#{universityFilterBean.studentDTO.currentArrears}">
+					<f:selectItem itemLabel="Select" itemValue="#{null}" />
+					<f:selectItem id="item1" itemLabel="Yes" itemValue="true" />
+					<f:selectItem id="item2" itemLabel="No" itemValue="false" />
+				</h:selectOneMenu>
+			</h:panelGroup>
+			<h:panelGroup>
+			<h:commandButton value="Save" id="saveLink" class="button"
+			rendered="#{universityFilterBean.pageFlag eq 'add'}"
+							action="#{universityFilterBean.saveDetails}">
+							<f:ajax execute="@form" render="@form" />
+						</h:commandButton>
+						<h:commandButton value="Back" id="back" class="button"
+			rendered="#{universityFilterBean.pageFlag eq 'add'}" immediate="true"
+							action="univDetails?faces-redirect=true">
+							<f:ajax execute="@form" render="@form" />
+						</h:commandButton>
+			</h:panelGroup>
+		</h:panelGrid>
+	</h:form>
+</h:body>
+</html>
