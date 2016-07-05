@@ -50,21 +50,28 @@ order-table {
 	background: none repeat scroll 0 0 #F9F9F9;
 	border-top: 1px solid #BBBBBB;
 }
+.isa_info {
+    color: #00529B;
+    background-color: #BDE5F8;
+}
 </style>
 	<h1 class="stu-header">University Search</h1>
+	<h:messages globalOnly="true" styleClass="isa_info" />
 				
 		<h:panelGrid id="stuDetails" columns="3" 
          cellpadding="10" cellspacing="0"
          rendered="#{universityFilterBean.pageFlag ne 'add'}">
 			<h:panelGroup>
 				<h:outputLabel value="University: " />
-				<h:selectOneMenu id="uName"
+				<h:selectOneMenu id="uName" required="true" requiredMessage="Please select univeristy"
 					value="#{universityFilterBean.universityId}"
 					styleClass="padd-rems rediocv col-xs-12 col-sm-12">
 					<f:selectItem itemLabel="Select" itemValue="#{null}" />
 					<f:selectItems value="#{universityFilterBean.universities}"
 						var="univ" itemValue="#{univ.id}" itemLabel="#{univ.name}" />
 				</h:selectOneMenu>
+				<br/>
+				<h:message for="uName" style="color:red "/>
 			</h:panelGroup>
 			<h:panelGroup>
 				<h:outputLabel value="Department Name: " />
@@ -104,6 +111,10 @@ order-table {
 					  action="univDetails?faces-redirect=true"
 						immediate="true" update="@form">
 					</h:commandButton>
+					<h:commandButton value="Download as Excel" class="button"
+                      action="#{universityFilterBean.downloadAsExcel()}"
+                     rendered="#{universityFilterBean.students.size()!=0 and universityFilterBean.students!=null}">
+                     </h:commandButton>
 			</h:panelGroup>
 		</h:panelGrid>
 
@@ -189,8 +200,10 @@ order-table {
          cellpadding="10" cellspacing="0" rendered="#{universityFilterBean.pageFlag eq 'add'}">
 			<h:panelGroup>
 				<h:outputLabel value="Comments: " />
-				<h:inputTextarea
+				<h:inputTextarea id="comments" required="true" requiredMessage="Please enter the comments"
 					value="#{universityFilterBean.comments}" />
+					<br/>
+					<h:message for="comments" style="color:red"/>
 			</h:panelGroup>
 			<h:panelGroup>
 				<h:outputLabel value="IsSlected: " />
